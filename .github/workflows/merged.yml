@@ -1,0 +1,31 @@
+name: Test
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+
+
+jobs:
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Create release
+        uses: actions/github-script@v5
+        env:
+          RELEASE_BRANCH: ${{ github.head_ref }}
+        with:
+          script: |
+            console.log("ok");
+            console.log(github.event.pull_request);
+            console.log("ok2");
+            console.log(github.event);
+            console.log("ok3");
+            console.log(context.payload);
+            console.log("ok4");
+            console.log(context);
+            console.log("ok5");
+            console.log(github.head_ref);
