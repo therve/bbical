@@ -20,12 +20,12 @@ jobs:
         with:
           script: |
             console.log("ok");
-            console.log(github.event.pull_request);
+            console.log(context);
             console.log("ok2");
-            console.log(github.event);
+            console.log(context.event);
             console.log("ok3");
             console.log(context.payload);
             console.log("ok4");
-            console.log(context);
+            console.log(context.head_ref);
             console.log("ok5");
-            console.log(github.head_ref);
+            console.log(context.event.pull_request);
