@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta
 import json
 import requests
@@ -8,7 +7,7 @@ from lxml import html
 from icalendar import Calendar, Event, vText
 import pytz
 
-tz = pytz.timezone('Europe/Paris')
+tz = pytz.timezone("Europe/Paris")
 
 
 def parse(filename):
@@ -18,7 +17,7 @@ def parse(filename):
 
     rows = tree.xpath('//table[@class="liste"]/tbody/tr')
     for row in rows:
-        cols = row.findall('td')
+        cols = row.findall("td")
         try:
             match_index = int(cols[0].text)
         except (ValueError, TypeError):
@@ -26,39 +25,38 @@ def parse(filename):
         print(match_index)
         date = cols[1].text
         time = cols[2].text
-        home = cols[3].find('a').text.title()
-        away = cols[4].find('a').text.title()
-        #import pdb; pdb.set_trace()
-        location_id = cols[6].find('a').get('href').split("'")[1]
-        resp = requests.get('http://resultats.ffbb.com/here/here_popup.php?id={}'.format(location_id))
+        home = cols[3].find("a").text.title()
+        away = cols[4].find("a").text.title()
+        # import pdb; pdb.set_trace()
+        location_id = cols[6].find("a").get("href").split("'")[1]
+        resp = requests.get("http://resultats.ffbb.com/here/here_popup.php?id={}".format(location_id))
         subtree = html.fromstring(resp.content)
-        scripts = subtree.find('head').findall('script')
+        scripts = subtree.find("head").findall("script")
         location = None
         for script in scripts:
-            if not script.text or not 'CDATA' in script.text:
+            if not script.text or not "CDATA" in script.text:
                 continue
-            start_data = script.text.find('{')
-            end_data = script.text.find('}')
-            data = json.loads(script.text[start_data:end_data+1])
-            location = '{} {} {}'.format(data['title'].title(), data['adress'],
-                                         data['city'])
-        dt = datetime.strptime('{} {}'.format(date, time), "%d/%m/%Y %H:%M")
+            start_data = script.text.find("{")
+            end_data = script.text.find("}")
+            data = json.loads(script.text[start_data : end_data + 1])
+            location = "{} {} {}".format(data["title"].title(), data["adress"], data["city"])
+        dt = datetime.strptime("{} {}".format(date, time), "%d/%m/%Y %H:%M")
         dt_with_tz = dt.astimezone(tz)
         yield match_index, dt_with_tz, home, away, location
 
 
 def main():
     cal = Calendar()
-    cal.add('prodid', '-//My calendar product//mxm.dk//')
-    cal.add('version', '2.0')
+    cal.add("prodid", "-//My calendar product//mxm.dk//")
+    cal.add("version", "2.0")
     for ind, dt, home, away, location in parse(sys.argv[1]):
         event = Event()
-        event.add('summary', 'Match {} - {} contre {}'.format(ind, home, away))
-        event.add('dtstart', dt)
-        event.add('dtend', dt + timedelta(hours=2))
-        event['location'] = vText(location)
+        event.add("summary", "Match {} - {} contre {}".format(ind, home, away))
+        event.add("dtstart", dt)
+        event.add("dtend", dt + timedelta(hours=2))
+        event["location"] = vText(location)
         cal.add_component(event)
-    with open('example.ics', 'wb') as f:
+    with open("example.ics", "wb") as f:
         f.write(cal.to_ical())
 
 
